@@ -12,25 +12,43 @@
     <button onclick="deleteStudent()">Delete</button>
     <p id="deleteRes"></p>
 
+    <h3>Students Table</h3>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+        <tbody id="tbody"></tbody>
+    </table>
+
     <script>
+        async function loadTable() {
+            let response = await fetch('/students');
+            let data = await response.json();
+            let html = '';
+            for (let s of data) {
+                html += `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.email}</td></tr>`;
+            }
+            document.getElementById('tbody').innerHTML = html;
+        }
+
         async function searchStudent() {
             let email = document.getElementById('emailBox').value;
-
             let response = await fetch('/students/search/' + email);
             let data = await response.json();
-
-            // Print the raw JSON on the screen
             document.getElementById('searchRes').innerText = JSON.stringify(data);
         }
 
         async function deleteStudent() {
             let id = document.getElementById('idBox').value;
-
             let response = await fetch('/students/' + id, { method: 'DELETE' });
             let text = await response.text();
-
             document.getElementById('deleteRes').innerText = text;
+            loadTable();
         }
+
+        loadTable();
     </script>
 </body>
 
