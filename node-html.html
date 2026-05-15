@@ -13,10 +13,12 @@
     <p id="deleteRes"></p>
 
     <h3>Students Table</h3>
-    <table border="1">
-        <tr>
+    <table border="1" cellpadding="5" style="border-collapse: collapse; text-align: left;">
+        <tr style="background-color: #f2f2f2;">
             <th>ID</th>
             <th>Name</th>
+            <th>Course</th>
+            <th>Year</th>
             <th>Email</th>
         </tr>
         <tbody id="tbody"></tbody>
@@ -28,7 +30,13 @@
             let data = await response.json();
             let html = '';
             for (let s of data) {
-                html += `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.email}</td></tr>`;
+                html += `<tr>
+                    <td>${s.id}</td>
+                    <td>${s.name}</td>
+                    <td>${s.course}</td>
+                    <td>${s.year}</td>
+                    <td>${s.email}</td>
+                </tr>`;
             }
             document.getElementById('tbody').innerHTML = html;
         }
