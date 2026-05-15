@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <h3>Search</h3>
+    <input id="emailBox" placeholder="Email">
+    <button onclick="searchStudent()">Search</button>
+    <p id="searchRes"></p>
+
+    <h3>Delete</h3>
+    <input id="idBox" placeholder="ID">
+    <button onclick="deleteStudent()">Delete</button>
+    <p id="deleteRes"></p>
+
+    <script>
+        async function searchStudent() {
+            let email = document.getElementById('emailBox').value;
+
+            let response = await fetch('/students/search/' + email);
+            let data = await response.json();
+
+            // Print the raw JSON on the screen
+            document.getElementById('searchRes').innerText = JSON.stringify(data);
+        }
+
+        async function deleteStudent() {
+            let id = document.getElementById('idBox').value;
+
+            let response = await fetch('/students/' + id, { method: 'DELETE' });
+            let text = await response.text();
+
+            document.getElementById('deleteRes').innerText = text;
+        }
+    </script>
+</body>
+
+</html>
