@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #aaa; padding: 8px; text-align: left; }
+        th { background-color: #eee; }
+        .result-msg { margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>Student Management System</h2>
+
+    <div class="section">
+        <h3>Search Student</h3>
+        <input type="email" id="searchEmail" placeholder="Enter Email Address">
+        <button onclick="searchByEmail()">Search by Email</button>
+        <div id="searchResult" class="result-msg" style="color: blue;"></div>
+    </div>
+
+    <div class="section">
+        <h3>Delete Student</h3>
+        <input type="text" id="deleteId" placeholder="Enter Student ID">
+        <button onclick="deleteById()">Delete by ID</button>
+        <div id="deleteResult" class="result-msg" style="color: red;"></div>
+    </div>
+
+    <div class="section">
+        <h3>All Students</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+                <!-- Data will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Fetch all students to build table
+        function loadTable() {
+            fetch('/students')
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById('studentsTableBody');
+                    tbody.innerHTML = '';
+                    if (Array.isArray(data)) {
+                        data.forEach(student => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${student.id}</td>
+                                <td>${student.name}</td>
+                                <td>${student.email}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    }
+                })
+                .catch(err => console.error('Error loading table:', err));
+        }
+
+        // Feature 1: Search by Email
+        function searchByEmail() {
+            const email = document.getElementById('searchEmail').value.trim();
+            if (!email) {
+                alert('Please enter an email.');
+                return;
+            }
+            
+            document.getElementById('searchResult').innerText = 'Searching...';
+            
+            fetch(`/students/search/${encodeURIComponent(email)}`)
+                .then(async res => {
+                    if (!res.ok) {
+                        const err = await res.json();
+                        throw new Error(err.error || 'Not found');
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    document.getElementById('searchResult').style.color = 'green';
+                    document.getElementById('searchResult').innerText = `Found: ID: ${data.id}, Name: ${data.name}, Email: ${data.email}`;
+                })
+                .catch(err => {
+                    document.getElementById('searchResult').style.color = 'red';
+                    document.getElementById('searchResult').innerText = `Error: ${err.message}`;
+                });
+        }
+
+        // Feature 2: Delete by ID
+        function deleteById() {
+            const id = document.getElementById('deleteId').value.trim();
+            if (!id) {
+                alert('Please enter an ID.');
+                return;
+            }
+            
+            document.getElementById('deleteResult').innerText = 'Deleting...';
+            
+            fetch(`/students/${encodeURIComponent(id)}`, {
+                method: 'DELETE'
+            })
+            .then(async res => {
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Error deleting');
+                }
+                return res.json();
+            })
+            .then(data => {
+                document.getElementById('deleteResult').style.color = 'green';
+                document.getElementById('deleteResult').innerText = data.message;
+                document.getElementById('deleteId').value = '';
+                loadTable(); // Refresh the table
+            })
+            .catch(err => {
+                document.getElementById('deleteResult').style.color = 'red';
+                document.getElementById('deleteResult').innerText = `Error: ${err.message}`;
+            });
+        }
+
+        // Initial table load
+        loadTable();
+    </script>
+</body>
+</html>
